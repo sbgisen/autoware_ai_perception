@@ -16,6 +16,7 @@
   <depend>pcl_ros</depend>
   <depend>roscpp</depend>
   <depend>sensor_msgs</depend>
+  <depend>velodyne_pcl</depend>
   <depend>velodyne_pointcloud</depend>
 
   <exec_depend>message_runtime</exec_depend>

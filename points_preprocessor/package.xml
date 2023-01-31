@@ -28,6 +28,7 @@
   <depend>tf2</depend>
   <depend>tf2_ros</depend>
   <depend>tf2_eigen</depend>
+  <depend>velodyne_pcl</depend>
   <depend>velodyne_pointcloud</depend>
   <depend>yaml-cpp</depend>
 </package>

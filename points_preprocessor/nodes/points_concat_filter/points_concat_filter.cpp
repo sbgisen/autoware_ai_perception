@@ -25,7 +25,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <tf/tf.h>
 #include <tf/transform_listener.h>
-#include <velodyne_pointcloud/point_types.h>
+#include <velodyne_pcl/point_types.h>
 #include <yaml-cpp/yaml.h>
 
 class PointsConcatFilter
@@ -43,8 +43,8 @@ private:
       SyncPolicyT;
 
   ros::NodeHandle node_handle_, private_node_handle_;
-  message_filters::Subscriber<PointCloudMsgT> *cloud_subscribers_[8];
-  message_filters::Synchronizer<SyncPolicyT> *cloud_synchronizer_;
+  message_filters::Subscriber<PointCloudMsgT>* cloud_subscribers_[8];
+  message_filters::Synchronizer<SyncPolicyT>* cloud_synchronizer_;
   ros::Subscriber config_subscriber_;
   ros::Publisher cloud_publisher_;
   tf::TransformListener tf_listener_;
@@ -53,10 +53,10 @@ private:
   std::string input_topics_;
   std::string output_frame_id_;
 
-  void pointcloud_callback(const PointCloudMsgT::ConstPtr &msg1, const PointCloudMsgT::ConstPtr &msg2,
-                           const PointCloudMsgT::ConstPtr &msg3, const PointCloudMsgT::ConstPtr &msg4,
-                           const PointCloudMsgT::ConstPtr &msg5, const PointCloudMsgT::ConstPtr &msg6,
-                           const PointCloudMsgT::ConstPtr &msg7, const PointCloudMsgT::ConstPtr &msg8);
+  void pointcloud_callback(const PointCloudMsgT::ConstPtr& msg1, const PointCloudMsgT::ConstPtr& msg2,
+                           const PointCloudMsgT::ConstPtr& msg3, const PointCloudMsgT::ConstPtr& msg4,
+                           const PointCloudMsgT::ConstPtr& msg5, const PointCloudMsgT::ConstPtr& msg6,
+                           const PointCloudMsgT::ConstPtr& msg7, const PointCloudMsgT::ConstPtr& msg8);
 };
 
 PointsConcatFilter::PointsConcatFilter() : node_handle_(), private_node_handle_("~"), tf_listener_()
@@ -92,10 +92,10 @@ PointsConcatFilter::PointsConcatFilter() : node_handle_(), private_node_handle_(
   cloud_publisher_ = node_handle_.advertise<PointCloudMsgT>("/points_concat", 1);
 }
 
-void PointsConcatFilter::pointcloud_callback(const PointCloudMsgT::ConstPtr &msg1, const PointCloudMsgT::ConstPtr &msg2,
-                                             const PointCloudMsgT::ConstPtr &msg3, const PointCloudMsgT::ConstPtr &msg4,
-                                             const PointCloudMsgT::ConstPtr &msg5, const PointCloudMsgT::ConstPtr &msg6,
-                                             const PointCloudMsgT::ConstPtr &msg7, const PointCloudMsgT::ConstPtr &msg8)
+void PointsConcatFilter::pointcloud_callback(const PointCloudMsgT::ConstPtr& msg1, const PointCloudMsgT::ConstPtr& msg2,
+                                             const PointCloudMsgT::ConstPtr& msg3, const PointCloudMsgT::ConstPtr& msg4,
+                                             const PointCloudMsgT::ConstPtr& msg5, const PointCloudMsgT::ConstPtr& msg6,
+                                             const PointCloudMsgT::ConstPtr& msg7, const PointCloudMsgT::ConstPtr& msg8)
 {
   assert(2 <= input_topics_size_ && input_topics_size_ <= 8);
 
@@ -113,10 +113,11 @@ void PointsConcatFilter::pointcloud_callback(const PointCloudMsgT::ConstPtr &msg
       cloud_sources[i] = PointCloudT().makeShared();
       pcl::fromROSMsg(*msgs[i], *cloud_sources[i]);
       tf_listener_.waitForTransform(output_frame_id_, msgs[i]->header.frame_id, ros::Time(0), ros::Duration(1.0));
-      pcl_ros::transformPointCloud(output_frame_id_, ros::Time(0), *cloud_sources[i], msgs[i]->header.frame_id, *cloud_sources[i], tf_listener_);
+      pcl_ros::transformPointCloud(output_frame_id_, ros::Time(0), *cloud_sources[i], msgs[i]->header.frame_id,
+                                   *cloud_sources[i], tf_listener_);
     }
   }
-  catch (tf::TransformException &ex)
+  catch (tf::TransformException& ex)
   {
     ROS_ERROR("%s", ex.what());
     return;
@@ -134,7 +135,7 @@ void PointsConcatFilter::pointcloud_callback(const PointCloudMsgT::ConstPtr &msg
   cloud_publisher_.publish(cloud_concatenated);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   ros::init(argc, argv, "points_concat_filter");
   PointsConcatFilter node;

@@ -33,7 +33,7 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <std_msgs/Bool.h>
 #include <std_msgs/Float32.h>
-#include <velodyne_pointcloud/point_types.h>
+#include <velodyne_pcl/point_types.h>
 #include <velodyne_pointcloud/rawdata.h>
 
 #include <tf/transform_broadcaster.h>
@@ -808,26 +808,12 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     exit(1);
   }
 
-  ofs << input->header.seq << ","
-      << input->header.stamp << ","
-      << input->header.frame_id << ","
-      << scan_ptr->size() << ","
-      << filtered_scan_ptr->size() << ","
-      << std::fixed << std::setprecision(5) << current_pose.x << ","
-      << std::fixed << std::setprecision(5) << current_pose.y << ","
-      << std::fixed << std::setprecision(5) << current_pose.z << ","
-      << current_pose.roll << ","
-      << current_pose.pitch << ","
-      << current_pose.yaw << ","
-      << final_num_iteration << ","
-      << fitness_score << ","
-      << ndt_res << ","
-      << step_size << ","
-      << trans_eps << ","
-      << max_iter << ","
-      << voxel_leaf_size << ","
-      << min_scan_range << ","
-      << max_scan_range << ","
+  ofs << input->header.seq << "," << input->header.stamp << "," << input->header.frame_id << "," << scan_ptr->size()
+      << "," << filtered_scan_ptr->size() << "," << std::fixed << std::setprecision(5) << current_pose.x << ","
+      << std::fixed << std::setprecision(5) << current_pose.y << "," << std::fixed << std::setprecision(5)
+      << current_pose.z << "," << current_pose.roll << "," << current_pose.pitch << "," << current_pose.yaw << ","
+      << final_num_iteration << "," << fitness_score << "," << ndt_res << "," << step_size << "," << trans_eps << ","
+      << max_iter << "," << voxel_leaf_size << "," << min_scan_range << "," << max_scan_range << ","
       << min_add_scan_shift << std::endl;
 
   std::cout << "-----------------------------------------------------------------" << std::endl;
@@ -938,26 +924,46 @@ int main(int argc, char** argv)
     exit(1);
   }
 
-  ofs << "input->header.seq" << ","
-      << "input->header.stamp" << ","
-      << "input->header.frame_id" << ","
-      << "scan_ptr->size()" << ","
-      << "filtered_scan_ptr->size()" << ","
-      << "current_pose.x" << ","
-      << "current_pose.y" << ","
-      << "current_pose.z" << ","
-      << "current_pose.roll" << ","
-      << "current_pose.pitch" << ","
-      << "current_pose.yaw" << ","
-      << "final_num_iteration" << ","
-      << "fitness_score" << ","
-      << "ndt_res" << ","
-      << "step_size" << ","
-      << "trans_eps" << ","
-      << "max_iter" << ","
-      << "voxel_leaf_size" << ","
-      << "min_scan_range" << ","
-      << "max_scan_range" << ","
+  ofs << "input->header.seq"
+      << ","
+      << "input->header.stamp"
+      << ","
+      << "input->header.frame_id"
+      << ","
+      << "scan_ptr->size()"
+      << ","
+      << "filtered_scan_ptr->size()"
+      << ","
+      << "current_pose.x"
+      << ","
+      << "current_pose.y"
+      << ","
+      << "current_pose.z"
+      << ","
+      << "current_pose.roll"
+      << ","
+      << "current_pose.pitch"
+      << ","
+      << "current_pose.yaw"
+      << ","
+      << "final_num_iteration"
+      << ","
+      << "fitness_score"
+      << ","
+      << "ndt_res"
+      << ","
+      << "step_size"
+      << ","
+      << "trans_eps"
+      << ","
+      << "max_iter"
+      << ","
+      << "voxel_leaf_size"
+      << ","
+      << "min_scan_range"
+      << ","
+      << "max_scan_range"
+      << ","
       << "min_add_scan_shift" << std::endl;
 
   // setting parameters
@@ -1019,12 +1025,8 @@ int main(int argc, char** argv)
   if (!received_tf)
   {
     float tf_x, tf_y, tf_z, tf_roll, tf_pitch, tf_yaw;
-    if (nh.getParam("tf_x", tf_x) &&
-        nh.getParam("tf_y", tf_y) &&
-        nh.getParam("tf_z", tf_z) &&
-        nh.getParam("tf_roll", tf_roll) &&
-        nh.getParam("tf_pitch", tf_pitch) &&
-        nh.getParam("tf_yaw", tf_yaw))
+    if (nh.getParam("tf_x", tf_x) && nh.getParam("tf_y", tf_y) && nh.getParam("tf_z", tf_z) &&
+        nh.getParam("tf_roll", tf_roll) && nh.getParam("tf_pitch", tf_pitch) && nh.getParam("tf_yaw", tf_yaw))
     {
       tf::Vector3 trans(tf_x, tf_y, tf_z);
       tf::Quaternion quat;

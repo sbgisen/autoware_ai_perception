@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   roscpp
   sensor_msgs
+  velodyne_pcl
   velodyne_pointcloud
 )
 

@@ -25,7 +25,7 @@
 #include <string>
 #include <ros/ros.h>
 #include <sensor_msgs/PointCloud2.h>
-#include <velodyne_pointcloud/point_types.h>
+#include <velodyne_pcl/point_types.h>
 #include "autoware_config_msgs/ConfigRayGroundFilter.h"
 
 #include <tf2/transform_datatypes.h>
@@ -36,7 +36,6 @@
 #include <autoware_health_checker/health_checker/health_checker.h>
 
 #define USE_ATAN_APPROXIMATION
-
 
 class RayGroundFilter
 {
@@ -67,7 +66,6 @@ private:
   size_t radial_dividers_num_;
   size_t concentric_dividers_num_;
 
-
   struct PointRH
   {
     float height;
@@ -75,8 +73,9 @@ private:
     void* original_data_pointer;
 
     PointRH(float height, float radius, void* original_data_pointer)
-        : height(height), radius(radius), original_data_pointer(original_data_pointer)
-    {}
+      : height(height), radius(radius), original_data_pointer(original_data_pointer)
+    {
+    }
   };
   typedef std::vector<PointRH> PointCloudRH;
 
@@ -99,9 +98,8 @@ private:
    * @param in_sensor_cloud The input point cloud from which to select the points to publish
    * @param in_selector The pointers to the input cloud's binary blob. No checks are done so be carefull
    */
-  void publish(ros::Publisher pub,
-                const sensor_msgs::PointCloud2ConstPtr in_sensor_cloud,
-                const std::vector<void*>& in_selector);
+  void publish(ros::Publisher pub, const sensor_msgs::PointCloud2ConstPtr in_sensor_cloud,
+               const std::vector<void*>& in_selector);
 
   /*!
    * Extract the points pointed by in_selector from in_radial_ordered_clouds to copy them in out_no_ground_ptrs
@@ -109,9 +107,8 @@ private:
    * @param in_selector The pointers to the input cloud's binary blob. No checks are done so be carefull
    * @param out_filtered_msg Returns a cloud comprised of the selected points from the origin cloud
    */
-  void filterROSMsg(const sensor_msgs::PointCloud2ConstPtr in_origin_cloud,
-                     const std::vector<void*>& in_selector,
-                     const sensor_msgs::PointCloud2::Ptr out_filtered_msg);
+  void filterROSMsg(const sensor_msgs::PointCloud2ConstPtr in_origin_cloud, const std::vector<void*>& in_selector,
+                    const sensor_msgs::PointCloud2::Ptr out_filtered_msg);
 
   /*!
    * Classifies Points in the PointCoud as Ground and Not Ground
@@ -120,10 +117,8 @@ private:
    * @param out_ground_indices Returns the indices of the points classified as ground in the original PointCloud
    * @param out_no_ground_indices Returns the indices of the points classified as not ground in the original PointCloud
    */
-  void ClassifyPointCloud(const std::vector<PointCloudRH>& in_radial_ordered_clouds,
-                          const size_t in_point_count,
-                          std::vector<void*>* out_ground_ptrs,
-                          std::vector<void*>* out_no_ground_ptrs);
+  void ClassifyPointCloud(const std::vector<PointCloudRH>& in_radial_ordered_clouds, const size_t in_point_count,
+                          std::vector<void*>* out_ground_ptrs, std::vector<void*>* out_no_ground_ptrs);
 
   /*!
    * Convert the sensor_msgs::PointCloud2 into PointCloudRH and filter out the points too high or too close
@@ -133,10 +128,8 @@ private:
    * @param out_radial_ordered_clouds Vector of Points Clouds, each element will contain the points ordered
    * @param out_no_ground_ptrs Returns the pointers to the points filtered out as no ground
    */
-  void ConvertAndTrim(const sensor_msgs::PointCloud2::Ptr in_transformed_cloud,
-                      const double in_clip_height,
-                      double in_min_distance,
-                      std::vector<PointCloudRH>* out_radial_ordered_clouds,
+  void ConvertAndTrim(const sensor_msgs::PointCloud2::Ptr in_transformed_cloud, const double in_clip_height,
+                      double in_min_distance, std::vector<PointCloudRH>* out_radial_ordered_clouds,
                       std::vector<void*>* out_no_ground_ptrs);
 
   void CloudCallback(const sensor_msgs::PointCloud2ConstPtr& in_sensor_cloud);
