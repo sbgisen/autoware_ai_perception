@@ -14,13 +14,13 @@
 #include "sensor_msgs/PointCloud2.h"
 #include "std_msgs/String.h"
 #include "tf/message_filter.h"
-#include "velodyne_pointcloud/point_types.h"
+#include "velodyne_pcl/point_types.h"
 #include "velodyne_pointcloud/rawdata.h"
 
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 
-pcl::PointCloud<velodyne_pointcloud::PointXYZIR> map;
+pcl::PointCloud<velodyne_pcl::PointXYZIRT> map;
 tf::TransformListener* tf_listener;
 ros::Publisher velodyne_pub;
 
@@ -32,11 +32,11 @@ ros::Time prev_time;
 static std::ofstream ofs;
 static std::string filename;
 
-// void velodyneCallback(const pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::ConstPtr& msg)
+// void velodyneCallback(const pcl::PointCloud<velodyne_pcl::PointXYZIRT>::ConstPtr& msg)
 void points_callback(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& msg)
 {
   static int count = 0;
-  //  pcl::PointCloud<velodyne_pointcloud::PointXYZIR> pcl_out;
+  //  pcl::PointCloud<velodyne_pcl::PointXYZIRT> pcl_out;
   pcl::PointCloud<pcl::PointXYZI> pcl_out;
   std_msgs::Header header;
   pcl_conversions::fromPCL(msg->header, header);
