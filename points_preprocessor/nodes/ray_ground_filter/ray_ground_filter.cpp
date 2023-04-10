@@ -84,9 +84,8 @@ bool RayGroundFilter::TransformPointCloud(const std::string& in_target_frame,
  * @param in_sensor_cloud The input point cloud from which to select the points to publish
  * @param in_selector The pointers to the input cloud's binary blob. No checks are done so be carefull
  */
-void RayGroundFilter::publish(ros::Publisher pub,
-                               const sensor_msgs::PointCloud2ConstPtr in_sensor_cloud,
-                               const std::vector<void*>& in_selector)
+void RayGroundFilter::publish(ros::Publisher pub, const sensor_msgs::PointCloud2ConstPtr in_sensor_cloud,
+                              const std::vector<void*>& in_selector)
 {
   sensor_msgs::PointCloud2::Ptr output_cloud(new sensor_msgs::PointCloud2);
   filterROSMsg(in_sensor_cloud, in_selector, output_cloud);
@@ -100,10 +99,10 @@ void RayGroundFilter::publish(ros::Publisher pub,
  * @param out_filtered_msg Returns a cloud comprised of the selected points from the origin cloud
  */
 void RayGroundFilter::filterROSMsg(const sensor_msgs::PointCloud2ConstPtr in_origin_cloud,
-                   const std::vector<void*>& in_selector,
-                   const sensor_msgs::PointCloud2::Ptr out_filtered_msg)
+                                   const std::vector<void*>& in_selector,
+                                   const sensor_msgs::PointCloud2::Ptr out_filtered_msg)
 {
-  size_t point_size = in_origin_cloud->row_step/in_origin_cloud->width;  // in Byte
+  size_t point_size = in_origin_cloud->row_step / in_origin_cloud->width;  // in Byte
 
   // TODO(yoan picchi) I fear this may do a lot of cache miss because it is sorted in the radius
   // and no longer sorted in the original pointer. One thing to try is that, given
@@ -115,22 +114,21 @@ void RayGroundFilter::filterROSMsg(const sensor_msgs::PointCloud2ConstPtr in_ori
   out_filtered_msg->data.resize(data_size);  // TODO(yoan picchi) a fair amount of time (5-10%) is wasted on this resize
 
   size_t offset = 0;
-  for ( auto it = in_selector.cbegin(); it != in_selector.cend(); it++ )
+  for (auto it = in_selector.cbegin(); it != in_selector.cend(); it++)
   {
-    memcpy(out_filtered_msg->data.data()+offset, *it, point_size);
+    memcpy(out_filtered_msg->data.data() + offset, *it, point_size);
     offset += point_size;
   }
 
-  out_filtered_msg->width  = (uint32_t) in_selector.size();
+  out_filtered_msg->width = (uint32_t)in_selector.size();
   out_filtered_msg->height = 1;
 
-  out_filtered_msg->fields            = in_origin_cloud->fields;
-  out_filtered_msg->header.frame_id   = base_frame_;
-  out_filtered_msg->header.stamp      = in_origin_cloud->header.stamp;
-  out_filtered_msg->point_step        = in_origin_cloud->point_step;
-  out_filtered_msg->row_step          = point_size * in_selector.size();
-  out_filtered_msg->is_dense          = in_origin_cloud->is_dense
-                                        && in_origin_cloud->data.size() == in_selector.size();
+  out_filtered_msg->fields = in_origin_cloud->fields;
+  out_filtered_msg->header.frame_id = base_frame_;
+  out_filtered_msg->header.stamp = in_origin_cloud->header.stamp;
+  out_filtered_msg->point_step = in_origin_cloud->point_step;
+  out_filtered_msg->row_step = point_size * in_selector.size();
+  out_filtered_msg->is_dense = in_origin_cloud->is_dense && in_origin_cloud->data.size() == in_selector.size();
 }
 
 /*!
@@ -138,11 +136,11 @@ void RayGroundFilter::filterROSMsg(const sensor_msgs::PointCloud2ConstPtr in_ori
  * @param in_radial_ordered_clouds Vector of an Ordered PointsCloud ordered by radial distance from the origin
  * @param in_point_count Total number of lidar point. This is used to reserve the output's vector memory
  * @param out_ground_ptrs Returns the original adress of the points classified as ground in the original PointCloud
- * @param out_no_ground_ptrs Returns the original adress of the points classified as not ground in the original PointCloud
+ * @param out_no_ground_ptrs Returns the original adress of the points classified as not ground in the original
+ * PointCloud
  */
 void RayGroundFilter::ClassifyPointCloud(const std::vector<PointCloudRH>& in_radial_ordered_clouds,
-                                         const size_t in_point_count,
-                                         std::vector<void*>* out_ground_ptrs,
+                                         const size_t in_point_count, std::vector<void*>* out_ground_ptrs,
                                          std::vector<void*>* out_no_ground_ptrs)
 {
   double expected_ground_no_ground_ratio = 0.1;
@@ -224,8 +222,8 @@ void RayGroundFilter::ClassifyPointCloud(const std::vector<PointCloudRH>& in_rad
 float ReverseFloat(float inFloat)  // Swap endianness
 {
   float retVal;
-  char *floatToConvert = reinterpret_cast<char*>(& inFloat);
-  char *returnFloat = reinterpret_cast<char*>(& retVal);
+  char* floatToConvert = reinterpret_cast<char*>(&inFloat);
+  char* returnFloat = reinterpret_cast<char*>(&retVal);
 
   // swap the bytes into a temporary buffer
   returnFloat[0] = floatToConvert[3];
@@ -242,7 +240,7 @@ bool is_big_endian(void)
   {
     uint32_t i;
     char c[4];
-  } bint = {0x01020304};
+  } bint = { 0x01020304 };
 
   return bint.c[0] == 1;
 }
@@ -256,14 +254,13 @@ bool is_big_endian(void)
  * @param out_no_ground_ptrs Returns the pointers to the points filtered out as no ground
  */
 void RayGroundFilter::ConvertAndTrim(const sensor_msgs::PointCloud2::Ptr in_transformed_cloud,
-                      const double in_clip_height,
-                      double in_min_distance,
-                      std::vector<PointCloudRH>* out_radial_ordered_clouds,
-                      std::vector<void*>* out_no_ground_ptrs)
+                                     const double in_clip_height, double in_min_distance,
+                                     std::vector<PointCloudRH>* out_radial_ordered_clouds,
+                                     std::vector<void*>* out_no_ground_ptrs)
 {
   // --- Clarify some of the values used to access the binary blob
-  size_t point_size = in_transformed_cloud->row_step/in_transformed_cloud->width;  // in Byte
-  size_t cloud_count = in_transformed_cloud->width*in_transformed_cloud->height;
+  size_t point_size = in_transformed_cloud->row_step / in_transformed_cloud->width;  // in Byte
+  size_t cloud_count = in_transformed_cloud->width * in_transformed_cloud->height;
 
   const uint offset_not_set = ~0;
   uint x_offset = offset_not_set;  // in Byte from the point's start
@@ -273,11 +270,11 @@ void RayGroundFilter::ConvertAndTrim(const sensor_msgs::PointCloud2::Ptr in_tran
   if (in_transformed_cloud->fields.size() < 3)
   {
     ROS_ERROR_STREAM_THROTTLE(10, "Failed to decode the pointcloud message : not enough fields found : "
-        << in_transformed_cloud->fields.size() << " (needs at least 3 : x,y,z)");
+                                      << in_transformed_cloud->fields.size() << " (needs at least 3 : x,y,z)");
     return;
   }
 
-  for ( uint i = 0; i < in_transformed_cloud->fields.size(); i++ )
+  for (uint i = 0; i < in_transformed_cloud->fields.size(); i++)
   {
     sensor_msgs::PointField field = in_transformed_cloud->fields[i];
     if ("x" == field.name)
@@ -303,7 +300,7 @@ void RayGroundFilter::ConvertAndTrim(const sensor_msgs::PointCloud2::Ptr in_tran
 
   out_radial_ordered_clouds->resize(radial_dividers_num_);
 
-  const int mean_ray_count = cloud_count/radial_dividers_num_;
+  const int mean_ray_count = cloud_count / radial_dividers_num_;
   // In theory reserving more than the average memory would reduce even more the number of realloc
   // but it would also make the reserving takes longer. One or two times the average are pretty
   // much identical in term of speedup. Three seems a bit worse.
@@ -313,13 +310,13 @@ void RayGroundFilter::ConvertAndTrim(const sensor_msgs::PointCloud2::Ptr in_tran
     it->reserve(reserve_count);
   }
 
-  for ( size_t i = 0; i < cloud_count; i++ )
+  for (size_t i = 0; i < cloud_count; i++)
   {
     // --- access the binary blob fields
-    uint8_t* point_start_ptr = reinterpret_cast<uint8_t*>(in_transformed_cloud->data.data()) + (i*point_size);
-    float x = *(reinterpret_cast<float*>(point_start_ptr+x_offset));
-    float y = *(reinterpret_cast<float*>(point_start_ptr+y_offset));
-    float z = *(reinterpret_cast<float*>(point_start_ptr+z_offset));
+    uint8_t* point_start_ptr = reinterpret_cast<uint8_t*>(in_transformed_cloud->data.data()) + (i * point_size);
+    float x = *(reinterpret_cast<float*>(point_start_ptr + x_offset));
+    float y = *(reinterpret_cast<float*>(point_start_ptr + y_offset));
+    float z = *(reinterpret_cast<float*>(point_start_ptr + z_offset));
     if (is_big_endian() != in_transformed_cloud->is_bigendian)
     {
       x = ReverseFloat(x);
@@ -333,7 +330,7 @@ void RayGroundFilter::ConvertAndTrim(const sensor_msgs::PointCloud2::Ptr in_tran
       out_no_ground_ptrs->push_back(point_start_ptr);
       continue;
     }
-    auto radius = static_cast<float>(sqrt(x*x + y*y));
+    auto radius = static_cast<float>(sqrt(x * x + y * y));
     if (radius < in_min_distance)
     {
       out_no_ground_ptrs->push_back(point_start_ptr);
@@ -364,8 +361,7 @@ void RayGroundFilter::ConvertAndTrim(const sensor_msgs::PointCloud2::Ptr in_tran
   }  // end for
 
   // order radial points on each division
-  auto strick_weak_radius_ordering = [](const PointRH& a, const PointRH& b)
-  {
+  auto strick_weak_radius_ordering = [](const PointRH& a, const PointRH& b) {
     if (a.radius < b.radius)
     {
       return true;
@@ -379,8 +375,7 @@ void RayGroundFilter::ConvertAndTrim(const sensor_msgs::PointCloud2::Ptr in_tran
   };
   for (size_t i = 0; i < radial_dividers_num_; i++)
   {
-    std::sort(out_radial_ordered_clouds->at(i).begin(),
-              out_radial_ordered_clouds->at(i).end(),
+    std::sort(out_radial_ordered_clouds->at(i).begin(), out_radial_ordered_clouds->at(i).end(),
               strick_weak_radius_ordering);
   }
 }
@@ -394,15 +389,15 @@ void RayGroundFilter::CloudCallback(const sensor_msgs::PointCloud2ConstPtr& in_s
   const bool succeeded = TransformPointCloud(base_frame_, in_sensor_cloud, trans_sensor_cloud);
   if (!succeeded)
   {
-    ROS_ERROR_STREAM_THROTTLE(10, "Failed transform from " << base_frame_ << " to "
-                                                           << in_sensor_cloud->header.frame_id);
+    ROS_ERROR_STREAM_THROTTLE(10,
+                              "Failed transform from " << base_frame_ << " to " << in_sensor_cloud->header.frame_id);
     return;
   }
 
   std::vector<PointCloudRH> radial_ordered_clouds;
   std::vector<void*> ground_ptrs, no_ground_ptrs;
   ConvertAndTrim(trans_sensor_cloud, clipping_height_, min_point_distance_, &radial_ordered_clouds, &no_ground_ptrs);
-  const size_t point_count = in_sensor_cloud->width*in_sensor_cloud->height;
+  const size_t point_count = in_sensor_cloud->width * in_sensor_cloud->height;
 
   ClassifyPointCloud(radial_ordered_clouds, point_count, &ground_ptrs, &no_ground_ptrs);
 
@@ -451,7 +446,6 @@ void RayGroundFilter::Run()
   pnh_.param("reclass_distance_threshold", reclass_distance_threshold_, 0.2);  // 0.2 meters default
   ROS_INFO("reclass_distance_threshold[meters]: %f", reclass_distance_threshold_);
 
-
   radial_dividers_num_ = ceil(360.0 / radial_divider_angle_);
   ROS_INFO("Radial Divisions: %d", (int)radial_dividers_num_);
 
@@ -464,8 +458,7 @@ void RayGroundFilter::Run()
   ROS_INFO("Subscribing to... %s", input_point_topic_.c_str());
   points_node_sub_ = nh_.subscribe(input_point_topic_, 1, &RayGroundFilter::CloudCallback, this);
 
-  config_node_sub_ =
-      nh_.subscribe("config/ray_ground_filter", 1, &RayGroundFilter::update_config_params, this);
+  config_node_sub_ = nh_.subscribe("config/ray_ground_filter", 1, &RayGroundFilter::update_config_params, this);
 
   groundless_points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(no_ground_topic, 2);
   ground_points_pub_ = nh_.advertise<sensor_msgs::PointCloud2>(ground_topic, 2);

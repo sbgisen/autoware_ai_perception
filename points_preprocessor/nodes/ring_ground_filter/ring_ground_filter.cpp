@@ -17,17 +17,15 @@ enum Label
 {
   GROUND,
   VERTICAL,
-  UNKNOWN //Initial state, not classified
+  UNKNOWN  // Initial state, not classified
 };
 
 class GroundFilter
 {
 public:
-
   GroundFilter();
 
 private:
-
   ros::NodeHandle node_handle_;
   ros::Subscriber points_node_sub_;
   ros::Publisher groundless_points_pub_;
@@ -35,35 +33,34 @@ private:
 
   std::string point_topic_;
   std::string no_ground_topic, ground_topic;
-  int     sensor_model_;
-  double     sensor_height_;
-  double     max_slope_;
+  int sensor_model_;
+  double sensor_height_;
+  double max_slope_;
   double vertical_thres_;
-  bool    floor_removal_;
+  bool floor_removal_;
 
-  int     vertical_res_;
-  int     horizontal_res_;
-  cv::Mat   index_map_;
-  Label     class_label_[64];
-  double  radius_table_[64];
+  int vertical_res_;
+  int horizontal_res_;
+  cv::Mat index_map_;
+  Label class_label_[64];
+  double radius_table_[64];
 
-  //boost::chrono::high_resolution_clock::time_point t1_;
-  //boost::chrono::high_resolution_clock::time_point t2_;
-  //boost::chrono::nanoseconds elap_time_;
+  // boost::chrono::high_resolution_clock::time_point t1_;
+  // boost::chrono::high_resolution_clock::time_point t2_;
+  // boost::chrono::nanoseconds elap_time_;
   ros::Time t1_;
   ros::Time t2_;
   ros::Duration elap_time_;
 
-  const int   DEFAULT_HOR_RES = 2000;
+  const int DEFAULT_HOR_RES = 2000;
 
   void InitLabelArray(int in_model);
   void InitRadiusTable(int in_model);
   void InitDepthMap(int in_width);
-  void VelodyneCallback(const pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::ConstPtr &in_cloud_msg);
-  void FilterGround(const pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::ConstPtr &in_cloud_msg,
-        pcl::PointCloud<velodyne_pointcloud::PointXYZIR> &out_groundless_points,
-        pcl::PointCloud<velodyne_pointcloud::PointXYZIR> &out_ground_points);
-
+  void VelodyneCallback(const pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::ConstPtr& in_cloud_msg);
+  void FilterGround(const pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::ConstPtr& in_cloud_msg,
+                    pcl::PointCloud<velodyne_pointcloud::PointXYZIR>& out_groundless_points,
+                    pcl::PointCloud<velodyne_pointcloud::PointXYZIR>& out_ground_points);
 };
 
 GroundFilter::GroundFilter() : node_handle_("~")
@@ -71,8 +68,8 @@ GroundFilter::GroundFilter() : node_handle_("~")
   ROS_INFO("Inititalizing Ground Filter...");
   node_handle_.param<std::string>("point_topic", point_topic_, "/points_raw");
   ROS_INFO("Input Point Cloud: %s", point_topic_.c_str());
-   node_handle_.param("remove_floor",  floor_removal_,  true);
-   ROS_INFO("Floor Removal: %d", floor_removal_);
+  node_handle_.param("remove_floor", floor_removal_, true);
+  ROS_INFO("Floor Removal: %d", floor_removal_);
   node_handle_.param("sensor_model", sensor_model_, 64);
   ROS_INFO("Sensor Model: %d", sensor_model_);
   node_handle_.param("sensor_height", sensor_height_, 1.80);
@@ -87,9 +84,8 @@ GroundFilter::GroundFilter() : node_handle_("~")
   node_handle_.param<std::string>("ground_point_topic", ground_topic, "/points_ground");
   ROS_INFO("Only Ground Output Point Cloud: %s", ground_topic.c_str());
 
-
   int default_horizontal_res;
-  switch(sensor_model_)
+  switch (sensor_model_)
   {
     case 64:
       default_horizontal_res = 2083;
@@ -117,7 +113,7 @@ GroundFilter::GroundFilter() : node_handle_("~")
 
 void GroundFilter::InitLabelArray(int in_model)
 {
-  for(int a = 0; a < vertical_res_; a++)
+  for (int a = 0; a < vertical_res_; a++)
   {
     class_label_[a] = UNKNOWN;
   }
@@ -131,58 +127,60 @@ void GroundFilter::InitRadiusTable(int in_model)
   switch (in_model)
   {
     case 64:
-      a = 1.0/3*M_PI/180;
-      b = max_slope_*M_PI/180;
+      a = 1.0 / 3 * M_PI / 180;
+      b = max_slope_ * M_PI / 180;
       for (int i = 0; i < 64; i++)
       {
         if (i <= 31)
         {
-          if (i == 31) a = -a;
-          theta = (1.0/3*i - 2.0)*M_PI/180;
-          radius_table_[i] = fabs(sensor_height_*(1.0/(tan(theta)+tan(b)) - 1.0/(tan(a+theta)+tan(b))));
+          if (i == 31)
+            a = -a;
+          theta = (1.0 / 3 * i - 2.0) * M_PI / 180;
+          radius_table_[i] = fabs(sensor_height_ * (1.0 / (tan(theta) + tan(b)) - 1.0 / (tan(a + theta) + tan(b))));
         }
         else
         {
-          a = 0.5*M_PI/180;
-          theta = (8.83 + (0.5)*(i - 32.0))*M_PI/180;
-          radius_table_[i] = fabs(sensor_height_*(1.0/(tan(theta)+tan(b)) - 1.0/(tan(a+theta)+tan(b))));
+          a = 0.5 * M_PI / 180;
+          theta = (8.83 + (0.5) * (i - 32.0)) * M_PI / 180;
+          radius_table_[i] = fabs(sensor_height_ * (1.0 / (tan(theta) + tan(b)) - 1.0 / (tan(a + theta) + tan(b))));
         }
       }
       break;
     case 32:
-      a = 4.0/3*M_PI/180;
-      b = max_slope_*M_PI/180;
+      a = 4.0 / 3 * M_PI / 180;
+      b = max_slope_ * M_PI / 180;
       for (int i = 0; i < 32; i++)
       {
-        theta = (-31.0/3 + (4.0/3)*i)*180/M_PI;
-        radius_table_[i] = fabs(sensor_height_*(1.0/(tan(theta)+tan(b)) - 1.0/(tan(a+theta)+tan(b))));
+        theta = (-31.0 / 3 + (4.0 / 3) * i) * 180 / M_PI;
+        radius_table_[i] = fabs(sensor_height_ * (1.0 / (tan(theta) + tan(b)) - 1.0 / (tan(a + theta) + tan(b))));
       }
       break;
     case 16:
-      a = 2.0*M_PI/180;
-      b = max_slope_*M_PI/180;
+      a = 2.0 * M_PI / 180;
+      b = max_slope_ * M_PI / 180;
       for (int i = 0; i < 16; i++)
       {
-        theta = (-30.0/2 + (2.0)*i)*180/M_PI;
-        radius_table_[i] = fabs(sensor_height_*(1.0/(tan(theta)+tan(b)) - 1.0/(tan(a+theta)+tan(b))));
+        theta = (-30.0 / 2 + (2.0) * i) * 180 / M_PI;
+        radius_table_[i] = fabs(sensor_height_ * (1.0 / (tan(theta) + tan(b)) - 1.0 / (tan(a + theta) + tan(b))));
       }
       break;
     default:
-      a = 1.0/3*M_PI/180;
-      b = max_slope_*M_PI/180;
+      a = 1.0 / 3 * M_PI / 180;
+      b = max_slope_ * M_PI / 180;
       for (int i = 0; i < 64; i++)
       {
         if (i <= 31)
         {
-          if (i == 31) a = -a;
-          theta = (1.0/3*i - 2.0)*M_PI/180;
-          radius_table_[i] = fabs(sensor_height_*(1.0/(tan(theta)+tan(b)) - 1.0/(tan(a+theta)+tan(b))));
+          if (i == 31)
+            a = -a;
+          theta = (1.0 / 3 * i - 2.0) * M_PI / 180;
+          radius_table_[i] = fabs(sensor_height_ * (1.0 / (tan(theta) + tan(b)) - 1.0 / (tan(a + theta) + tan(b))));
         }
         else
         {
-          a = 0.5*M_PI/180;
-          theta = (8.83 + (0.5)*(i - 32.0))*M_PI/180;
-          radius_table_[i] = fabs(sensor_height_*(1.0/(tan(theta)+tan(b)) - 1.0/(tan(a+theta)+tan(b))));
+          a = 0.5 * M_PI / 180;
+          theta = (8.83 + (0.5) * (i - 32.0)) * M_PI / 180;
+          radius_table_[i] = fabs(sensor_height_ * (1.0 / (tan(theta) + tan(b)) - 1.0 / (tan(a + theta) + tan(b))));
         }
       }
       break;
@@ -195,18 +193,20 @@ void GroundFilter::InitDepthMap(int in_width)
   index_map_ = cv::Mat_<int>(vertical_res_, in_width, mOne);
 }
 
-void GroundFilter::FilterGround(const pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::ConstPtr &in_cloud_msg,
-      pcl::PointCloud<velodyne_pointcloud::PointXYZIR> &out_groundless_points,
-      pcl::PointCloud<velodyne_pointcloud::PointXYZIR> &out_ground_points)
+void GroundFilter::FilterGround(const pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::ConstPtr& in_cloud_msg,
+                                pcl::PointCloud<velodyne_pointcloud::PointXYZIR>& out_groundless_points,
+                                pcl::PointCloud<velodyne_pointcloud::PointXYZIR>& out_ground_points)
 {
-
   velodyne_pointcloud::PointXYZIR point;
   InitDepthMap(horizontal_res_);
 
   for (size_t i = 0; i < in_cloud_msg->points.size(); i++)
   {
-    double u = atan2(in_cloud_msg->points[i].y,in_cloud_msg->points[i].x) * 180/M_PI;
-    if (u < 0) { u = 360 + u; }
+    double u = atan2(in_cloud_msg->points[i].y, in_cloud_msg->points[i].x) * 180 / M_PI;
+    if (u < 0)
+    {
+      u = 360 + u;
+    }
     int column = horizontal_res_ - (int)((double)horizontal_res_ * u / 360.0) - 1;
     int row = vertical_res_ - 1 - in_cloud_msg->points[i].ring;
     index_map_.at<int>(row, column) = i;
@@ -223,18 +223,20 @@ void GroundFilter::FilterGround(const pcl::PointCloud<velodyne_pointcloud::Point
     std::copy(class_label_, class_label_ + vertical_res_, point_class);
     for (int j = 0; j < vertical_res_; j++)
     {
-      if (index_map_.at<int>(j,i) > -1 && point_class[j] == UNKNOWN)
+      if (index_map_.at<int>(j, i) > -1 && point_class[j] == UNKNOWN)
       {
         double x0 = in_cloud_msg->points[index_map_.at<int>(j, i)].x;
         double y0 = in_cloud_msg->points[index_map_.at<int>(j, i)].y;
         double z0 = in_cloud_msg->points[index_map_.at<int>(j, i)].z;
-        double r0 = sqrt(x0*x0 + y0*y0);
+        double r0 = sqrt(x0 * x0 + y0 * y0);
         double r_diff = fabs(r0 - r_ref);
         if (r_diff < radius_table_[j] || r_ref == 0)
         {
           r_ref = r0;
-          if (z0 > z_max || r_ref == 0) z_max = z0;
-          if (z0 < z_min || r_ref == 0) z_min = z0;
+          if (z0 > z_max || r_ref == 0)
+            z_max = z0;
+          if (z0 < z_min || r_ref == 0)
+            z_min = z0;
           point_index[point_index_size] = j;
           point_index_size++;
         }
@@ -244,7 +246,7 @@ void GroundFilter::FilterGround(const pcl::PointCloud<velodyne_pointcloud::Point
           {
             for (int m = 0; m < point_index_size; m++)
             {
-              int index = index_map_.at<int>(point_index[m],i);
+              int index = index_map_.at<int>(point_index[m], i);
               point.x = in_cloud_msg->points[index].x;
               point.y = in_cloud_msg->points[index].y;
               point.z = in_cloud_msg->points[index].z;
@@ -259,7 +261,7 @@ void GroundFilter::FilterGround(const pcl::PointCloud<velodyne_pointcloud::Point
           {
             for (int m = 0; m < point_index_size; m++)
             {
-              int index = index_map_.at<int>(point_index[m],i);
+              int index = index_map_.at<int>(point_index[m], i);
               point.x = in_cloud_msg->points[index].x;
               point.y = in_cloud_msg->points[index].y;
               point.z = in_cloud_msg->points[index].z;
@@ -279,45 +281,44 @@ void GroundFilter::FilterGround(const pcl::PointCloud<velodyne_pointcloud::Point
       }
       if (j == vertical_res_ - 1 && point_index_size != 0)
       {
-          if (point_index_size > 1 && (z_max - z_min) > vertical_thres_)
+        if (point_index_size > 1 && (z_max - z_min) > vertical_thres_)
+        {
+          for (int m = 0; m < point_index_size; m++)
           {
-            for (int m = 0; m < point_index_size; m++)
-            {
-              int index = index_map_.at<int>(point_index[m],i);
-              point.x = in_cloud_msg->points[index].x;
-              point.y = in_cloud_msg->points[index].y;
-              point.z = in_cloud_msg->points[index].z;
-              point.intensity = in_cloud_msg->points[index].intensity;
-              point.ring = in_cloud_msg->points[index].ring;
-              out_groundless_points.push_back(point);
-              point_class[point_index[m]] = VERTICAL;
-            }
-            point_index_size = 0;
+            int index = index_map_.at<int>(point_index[m], i);
+            point.x = in_cloud_msg->points[index].x;
+            point.y = in_cloud_msg->points[index].y;
+            point.z = in_cloud_msg->points[index].z;
+            point.intensity = in_cloud_msg->points[index].intensity;
+            point.ring = in_cloud_msg->points[index].ring;
+            out_groundless_points.push_back(point);
+            point_class[point_index[m]] = VERTICAL;
           }
-          else
+          point_index_size = 0;
+        }
+        else
+        {
+          for (int m = 0; m < point_index_size; m++)
           {
-            for (int m = 0; m < point_index_size; m++)
-            {
-              int index = index_map_.at<int>(point_index[m],i);
-              point.x = in_cloud_msg->points[index].x;
-              point.y = in_cloud_msg->points[index].y;
-              point.z = in_cloud_msg->points[index].z;
-              point.intensity = in_cloud_msg->points[index].intensity;
-              point.ring = in_cloud_msg->points[index].ring;
-              out_ground_points.push_back(point);
-              point_class[point_index[m]] = GROUND;
-            }
-            point_index_size = 0;
+            int index = index_map_.at<int>(point_index[m], i);
+            point.x = in_cloud_msg->points[index].x;
+            point.y = in_cloud_msg->points[index].y;
+            point.z = in_cloud_msg->points[index].z;
+            point.intensity = in_cloud_msg->points[index].intensity;
+            point.ring = in_cloud_msg->points[index].ring;
+            out_ground_points.push_back(point);
+            point_class[point_index[m]] = GROUND;
           }
+          point_index_size = 0;
+        }
       }
     }
   }
 }
 
-void GroundFilter::VelodyneCallback(const pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::ConstPtr &in_cloud_msg)
+void GroundFilter::VelodyneCallback(const pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::ConstPtr& in_cloud_msg)
 {
-
-  //t1_ = ros::Time().now();
+  // t1_ = ros::Time().now();
   pcl::PointCloud<velodyne_pointcloud::PointXYZIR> vertical_points;
   pcl::PointCloud<velodyne_pointcloud::PointXYZIR> ground_points;
   vertical_points.header = in_cloud_msg->header;
@@ -334,19 +335,17 @@ void GroundFilter::VelodyneCallback(const pcl::PointCloud<velodyne_pointcloud::P
 
   groundless_points_pub_.publish(vertical_points);
   ground_points_pub_.publish(ground_points);
-  //t2_ = boost::chrono::high_resolution_clock::now();
-  //t2_ = ros::Time().now();
-  //elap_time_ = t2_ - t1_;//boost::chrono::duration_cast<boost::chrono::nanoseconds>(t2_-t1_);
-  //std::cout << "Computational Time for one frame: " << elap_time_ << '\n';
+  // t2_ = boost::chrono::high_resolution_clock::now();
+  // t2_ = ros::Time().now();
+  // elap_time_ = t2_ - t1_;//boost::chrono::duration_cast<boost::chrono::nanoseconds>(t2_-t1_);
+  // std::cout << "Computational Time for one frame: " << elap_time_ << '\n';
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-
   ros::init(argc, argv, "ring_ground_filter");
   GroundFilter node;
   ros::spin();
 
   return 0;
-
 }

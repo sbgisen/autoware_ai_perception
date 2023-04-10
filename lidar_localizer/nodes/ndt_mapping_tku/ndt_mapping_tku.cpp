@@ -74,7 +74,7 @@ static Eigen::Matrix4f tf_btol, tf_ltob;  // tf between base_link and localizer
 static tf::Quaternion q_local_to_global;
 static Eigen::Matrix4f tf_local_to_global;
 
-void save_nd_map(char *name);
+void save_nd_map(char* name);
 
 static pcl::PointCloud<pcl::PointXYZ> map;
 
@@ -87,7 +87,7 @@ static ros::Publisher localizer_pose_pub, ndt_pose_pub;
 static geometry_msgs::PoseStamped localizer_pose_msg, ndt_pose_msg;
 
 // double pose_mod(Posture *pose){
-void pose_mod(Posture *pose)
+void pose_mod(Posture* pose)
 {
   while (pose->theta < -M_PI)
     pose->theta += 2 * M_PI;
@@ -110,12 +110,12 @@ double nrand(double n)
   return r;
 }
 
-void points_callback(const sensor_msgs::PointCloud2::ConstPtr &msg)
+void points_callback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 {
   matching_start = std::chrono::system_clock::now();
   static int count = 0;
   static tf::TransformBroadcaster br;
-  static FILE *log_fp;
+  static FILE* log_fp;
   ros::Time time;
   static tf::TransformListener listener;
   static ros::Time current_scan_time;
@@ -220,7 +220,7 @@ void points_callback(const sensor_msgs::PointCloud2::ConstPtr &msg)
     /*gps resetting*/
     if (g_use_gnss)
     {
-      static FILE *e_fp;
+      static FILE* e_fp;
       if (!e_fp)
       {
         e_fp = fopen("/tmp/e_log", "w");
@@ -407,13 +407,13 @@ void points_callback(const sensor_msgs::PointCloud2::ConstPtr &msg)
   std::cout << "-----------------------------------------------------------------" << std::endl;
 }
 
-void save_nd_map(char *name)
+void save_nd_map(char* name)
 {
   int i, j, k, layer;
   NDData nddat;
   NDMapPtr ndmap;
-  NDPtr *ndp;
-  FILE *ofp;
+  NDPtr* ndp;
+  FILE* ofp;
 
   pcl::PointCloud<pcl::PointXYZ> cloud;
   pcl::PointXYZ p;
@@ -468,7 +468,7 @@ void save_nd_map(char *name)
   ndmap_pub.publish(*ndmap_ptr);
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
   std::cout << " 3D NDT scan mapping" << std::endl;
 
@@ -491,7 +491,8 @@ int main(int argc, char *argv[])
   }
 
   // translation x, y, z, yaw, pitch, and roll
-  if (_tf_baselink2primarylidar.size() != 6) {
+  if (_tf_baselink2primarylidar.size() != 6)
+  {
     std::cout << "baselink to primary lidar transform is not valid." << std::endl;
     return 1;
   }
@@ -561,6 +562,6 @@ int main(int argc, char *argv[])
 
   ros::spin();
 
-  save_nd_map((char *)"/tmp/ndmap");
+  save_nd_map((char*)"/tmp/ndmap");
   return 1;
 }

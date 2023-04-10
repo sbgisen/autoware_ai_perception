@@ -21,7 +21,7 @@
 #include <message_filters/time_synchronizer.h>
 
 pcl::PointCloud<velodyne_pointcloud::PointXYZIR> map;
-tf::TransformListener *tf_listener;
+tf::TransformListener* tf_listener;
 ros::Publisher velodyne_pub;
 
 char dir_name[100];
@@ -33,7 +33,7 @@ static std::ofstream ofs;
 static std::string filename;
 
 // void velodyneCallback(const pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::ConstPtr& msg)
-void points_callback(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr &msg)
+void points_callback(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr& msg)
 {
   static int count = 0;
   //  pcl::PointCloud<velodyne_pointcloud::PointXYZIR> pcl_out;
@@ -108,7 +108,7 @@ void points_callback(const pcl::PointCloud<pcl::PointXYZI>::ConstPtr &msg)
   prev_time = header.stamp;
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   ros::init(argc, argv, "mapping");
   ros::NodeHandle n;
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
   // Set log file name.
   char buffer[80];
   std::time_t now = std::time(NULL);
-  std::tm *pnow = std::localtime(&now);
+  std::tm* pnow = std::localtime(&now);
   std::strftime(buffer, 80, "%Y%m%d_%H%M%S", pnow);
   filename = "ndt_mapping_tku_" + std::string(buffer) + ".csv";
   ofs.open(filename.c_str(), std::ios::app);

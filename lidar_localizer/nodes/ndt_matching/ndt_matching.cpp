@@ -66,7 +66,7 @@
 
 #include <autoware_msgs/NDTStat.h>
 
-//headers in Autoware Health Checker
+// headers in Autoware Health Checker
 #include <autoware_health_checker/health_checker/health_checker.h>
 
 #define PREDICT_POSE_THRESHOLD 0.5
@@ -227,28 +227,28 @@ static unsigned int points_map_num = 0;
 
 pthread_mutex_t mutex;
 
-static pose convertPoseIntoRelativeCoordinate(const pose &target_pose, const pose &reference_pose)
+static pose convertPoseIntoRelativeCoordinate(const pose& target_pose, const pose& reference_pose)
 {
-    tf2::Quaternion target_q;
-    target_q.setRPY(target_pose.roll, target_pose.pitch, target_pose.yaw);
-    tf2::Vector3 target_v(target_pose.x, target_pose.y, target_pose.z);
-    tf2::Transform target_tf(target_q, target_v);
+  tf2::Quaternion target_q;
+  target_q.setRPY(target_pose.roll, target_pose.pitch, target_pose.yaw);
+  tf2::Vector3 target_v(target_pose.x, target_pose.y, target_pose.z);
+  tf2::Transform target_tf(target_q, target_v);
 
-    tf2::Quaternion reference_q;
-    reference_q.setRPY(reference_pose.roll, reference_pose.pitch, reference_pose.yaw);
-    tf2::Vector3 reference_v(reference_pose.x, reference_pose.y, reference_pose.z);
-    tf2::Transform reference_tf(reference_q, reference_v);
+  tf2::Quaternion reference_q;
+  reference_q.setRPY(reference_pose.roll, reference_pose.pitch, reference_pose.yaw);
+  tf2::Vector3 reference_v(reference_pose.x, reference_pose.y, reference_pose.z);
+  tf2::Transform reference_tf(reference_q, reference_v);
 
-    tf2::Transform trans_target_tf = reference_tf.inverse() * target_tf;
+  tf2::Transform trans_target_tf = reference_tf.inverse() * target_tf;
 
-    pose trans_target_pose;
-    trans_target_pose.x = trans_target_tf.getOrigin().getX();
-    trans_target_pose.y = trans_target_tf.getOrigin().getY();
-    trans_target_pose.z = trans_target_tf.getOrigin().getZ();
-    tf2::Matrix3x3 tmp_m(trans_target_tf.getRotation());
-    tmp_m.getRPY(trans_target_pose.roll, trans_target_pose.pitch, trans_target_pose.yaw);
+  pose trans_target_pose;
+  trans_target_pose.x = trans_target_tf.getOrigin().getX();
+  trans_target_pose.y = trans_target_tf.getOrigin().getY();
+  trans_target_pose.z = trans_target_tf.getOrigin().getZ();
+  tf2::Matrix3x3 tmp_m(trans_target_tf.getRotation());
+  tmp_m.getRPY(trans_target_pose.roll, trans_target_pose.pitch, trans_target_pose.yaw);
 
-    return trans_target_pose;
+  return trans_target_pose;
 }
 
 static void param_callback(const autoware_config_msgs::ConfigNDT::ConstPtr& input)
@@ -528,7 +528,7 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 static void gnss_callback(const geometry_msgs::PoseStamped::ConstPtr& input)
 {
   tf2::Quaternion gnss_q(input->pose.orientation.x, input->pose.orientation.y, input->pose.orientation.z,
-                        input->pose.orientation.w);
+                         input->pose.orientation.w);
   tf2::Matrix3x3 gnss_m(gnss_q);
 
   pose current_gnss_pose;
@@ -569,7 +569,7 @@ static void gnss_callback(const geometry_msgs::PoseStamped::ConstPtr& input)
 
     const double diff_time = (current_gnss_time - previous_gnss_time).toSec();
     current_velocity = (diff_time > 0) ? (diff / diff_time) : 0;
-    current_velocity =  (trans_current_pose.x >= 0) ? current_velocity : -current_velocity;
+    current_velocity = (trans_current_pose.x >= 0) ? current_velocity : -current_velocity;
     current_velocity_x = (diff_time > 0) ? (diff_x / diff_time) : 0;
     current_velocity_y = (diff_time > 0) ? (diff_y / diff_time) : 0;
     current_velocity_z = (diff_time > 0) ? (diff_z / diff_time) : 0;
@@ -607,7 +607,7 @@ static void initialpose_callback(const geometry_msgs::PoseWithCovarianceStamped:
   }
 
   tf2::Quaternion q(input->pose.pose.orientation.x, input->pose.pose.orientation.y, input->pose.pose.orientation.z,
-                   input->pose.pose.orientation.w);
+                    input->pose.pose.orientation.w);
   tf2::Matrix3x3 m(q);
 
   if (_use_local_transform == true)
@@ -918,7 +918,8 @@ static void imu_callback(const sensor_msgs::Imu::Ptr& input)
 
 static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 {
-  health_checker_ptr_->CHECK_RATE("topic_rate_filtered_points_slow", 8, 5, 1, "topic filtered_points subscribe rate slow.");
+  health_checker_ptr_->CHECK_RATE("topic_rate_filtered_points_slow", 8, 5, 1,
+                                  "topic filtered_points subscribe rate slow.");
   if (map_loaded == 1 && init_pos_set == 1)
   {
     matching_start = std::chrono::system_clock::now();
@@ -1164,7 +1165,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     const pose trans_current_pose = convertPoseIntoRelativeCoordinate(current_pose, previous_pose);
 
     current_velocity = (diff_time > 0) ? (diff / diff_time) : 0;
-    current_velocity =  (trans_current_pose.x >= 0) ? current_velocity : -current_velocity;
+    current_velocity = (trans_current_pose.x >= 0) ? current_velocity : -current_velocity;
     current_velocity_x = (diff_time > 0) ? (diff_x / diff_time) : 0;
     current_velocity_y = (diff_time > 0) ? (diff_y / diff_time) : 0;
     current_velocity_z = (diff_time > 0) ? (diff_z / diff_time) : 0;
@@ -1370,7 +1371,8 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     matching_end = std::chrono::system_clock::now();
     exe_time = std::chrono::duration_cast<std::chrono::microseconds>(matching_end - matching_start).count() / 1000.0;
     time_ndt_matching.data = exe_time;
-    health_checker_ptr_->CHECK_MAX_VALUE("time_ndt_matching", time_ndt_matching.data, 50, 70, 100, "value time_ndt_matching is too high.");
+    health_checker_ptr_->CHECK_MAX_VALUE("time_ndt_matching", time_ndt_matching.data, 50, 70, 100,
+                                         "value time_ndt_matching is too high.");
     time_ndt_matching_pub.publish(time_ndt_matching);
 
     // Set values for /estimate_twist
@@ -1388,8 +1390,10 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     geometry_msgs::Vector3Stamped estimate_vel_msg;
     estimate_vel_msg.header.stamp = current_scan_time;
     estimate_vel_msg.vector.x = current_velocity;
-    health_checker_ptr_->CHECK_MAX_VALUE("estimate_twist_linear", current_velocity, 5, 10, 15, "value linear estimated twist is too high.");
-    health_checker_ptr_->CHECK_MAX_VALUE("estimate_twist_angular", angular_velocity, 5, 10, 15, "value linear angular twist is too high.");
+    health_checker_ptr_->CHECK_MAX_VALUE("estimate_twist_linear", current_velocity, 5, 10, 15,
+                                         "value linear estimated twist is too high.");
+    health_checker_ptr_->CHECK_MAX_VALUE("estimate_twist_angular", angular_velocity, 5, 10, 15,
+                                         "value linear angular twist is too high.");
     estimated_vel_pub.publish(estimate_vel_msg);
 
     // Set values for /ndt_stat
@@ -1408,7 +1412,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     ndt_reliability_pub.publish(ndt_reliability);
 
     // Write log
-    if(_output_log_data)
+    if (_output_log_data)
     {
       if (!ofs)
       {
@@ -1417,17 +1421,17 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
       else
       {
         ofs << input->header.seq << "," << scan_points_num << "," << step_size << "," << trans_eps << "," << std::fixed
-            << std::setprecision(5) << current_pose.x << "," << std::fixed << std::setprecision(5) << current_pose.y << ","
-            << std::fixed << std::setprecision(5) << current_pose.z << "," << current_pose.roll << "," << current_pose.pitch
-            << "," << current_pose.yaw << "," << predict_pose.x << "," << predict_pose.y << "," << predict_pose.z << ","
-            << predict_pose.roll << "," << predict_pose.pitch << "," << predict_pose.yaw << ","
+            << std::setprecision(5) << current_pose.x << "," << std::fixed << std::setprecision(5) << current_pose.y
+            << "," << std::fixed << std::setprecision(5) << current_pose.z << "," << current_pose.roll << ","
+            << current_pose.pitch << "," << current_pose.yaw << "," << predict_pose.x << "," << predict_pose.y << ","
+            << predict_pose.z << "," << predict_pose.roll << "," << predict_pose.pitch << "," << predict_pose.yaw << ","
             << current_pose.x - predict_pose.x << "," << current_pose.y - predict_pose.y << ","
             << current_pose.z - predict_pose.z << "," << current_pose.roll - predict_pose.roll << ","
             << current_pose.pitch - predict_pose.pitch << "," << current_pose.yaw - predict_pose.yaw << ","
             << predict_pose_error << "," << iteration << "," << fitness_score << "," << trans_probability << ","
             << ndt_reliability.data << "," << current_velocity << "," << current_velocity_smooth << "," << current_accel
-            << "," << angular_velocity << "," << time_ndt_matching.data << "," << align_time << "," << getFitnessScore_time
-            << std::endl;
+            << "," << angular_velocity << "," << time_ndt_matching.data << "," << align_time << ","
+            << getFitnessScore_time << std::endl;
       }
     }
 
@@ -1518,13 +1522,13 @@ int main(int argc, char** argv)
 
   ros::NodeHandle nh;
   ros::NodeHandle private_nh("~");
-  health_checker_ptr_ = std::make_shared<autoware_health_checker::HealthChecker>(nh,private_nh);
+  health_checker_ptr_ = std::make_shared<autoware_health_checker::HealthChecker>(nh, private_nh);
   health_checker_ptr_->ENABLE();
   health_checker_ptr_->NODE_ACTIVATE();
 
   // Set log file name.
   private_nh.getParam("output_log_data", _output_log_data);
-  if(_output_log_data)
+  if (_output_log_data)
   {
     char buffer[80];
     std::time_t now = std::time(NULL);
@@ -1563,7 +1567,7 @@ int main(int argc, char** argv)
   try
   {
     tf_baselink2primarylidar =
-      tf_buffer.lookupTransform("base_link", lidar_frame, ros::Time().now(), ros::Duration(3.0));
+        tf_buffer.lookupTransform("base_link", lidar_frame, ros::Time().now(), ros::Duration(3.0));
   }
   catch (tf2::TransformException& ex)
   {
@@ -1595,12 +1599,8 @@ int main(int argc, char** argv)
   if (!received_tf)
   {
     float tf_x, tf_y, tf_z, tf_roll, tf_pitch, tf_yaw;
-    if (nh.getParam("tf_x", tf_x) &&
-        nh.getParam("tf_y", tf_y) &&
-        nh.getParam("tf_z", tf_z) &&
-        nh.getParam("tf_roll", tf_roll) &&
-        nh.getParam("tf_pitch", tf_pitch) &&
-        nh.getParam("tf_yaw", tf_yaw))
+    if (nh.getParam("tf_x", tf_x) && nh.getParam("tf_y", tf_y) && nh.getParam("tf_z", tf_z) &&
+        nh.getParam("tf_roll", tf_roll) && nh.getParam("tf_pitch", tf_pitch) && nh.getParam("tf_yaw", tf_yaw))
     {
       tf2::Vector3 tf_trans(tf_x, tf_y, tf_z);
       tf2::Quaternion tf_quat;

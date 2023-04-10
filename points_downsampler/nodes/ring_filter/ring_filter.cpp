@@ -71,7 +71,7 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
   scan.points.clear();
 
-  double square_measurement_range = measurement_range*measurement_range;
+  double square_measurement_range = measurement_range * measurement_range;
 
   for (pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::const_iterator item = tmp.begin(); item != tmp.end(); item++)
   {
@@ -131,26 +131,24 @@ static void scan_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
   }
   points_downsampler_info_msg.original_ring_size = ring_max;
   points_downsampler_info_msg.filtered_ring_size = ring_max / ring_div;
-  points_downsampler_info_msg.exe_time = std::chrono::duration_cast<std::chrono::microseconds>(filter_end - filter_start).count() / 1000.0;
+  points_downsampler_info_msg.exe_time =
+      std::chrono::duration_cast<std::chrono::microseconds>(filter_end - filter_start).count() / 1000.0;
   points_downsampler_info_pub.publish(points_downsampler_info_msg);
 
-  if(_output_log == true){
-    if(!ofs){
+  if (_output_log == true)
+  {
+    if (!ofs)
+    {
       std::cerr << "Could not open " << filename << "." << std::endl;
       exit(1);
     }
-    ofs << points_downsampler_info_msg.header.seq << ","
-      << points_downsampler_info_msg.header.stamp << ","
-      << points_downsampler_info_msg.header.frame_id << ","
-      << points_downsampler_info_msg.filter_name << ","
-      << points_downsampler_info_msg.original_points_size << ","
-      << points_downsampler_info_msg.filtered_points_size << ","
-      << points_downsampler_info_msg.original_ring_size << ","
-      << points_downsampler_info_msg.filtered_ring_size << ","
-      << points_downsampler_info_msg.exe_time << ","
-      << std::endl;
+    ofs << points_downsampler_info_msg.header.seq << "," << points_downsampler_info_msg.header.stamp << ","
+        << points_downsampler_info_msg.header.frame_id << "," << points_downsampler_info_msg.filter_name << ","
+        << points_downsampler_info_msg.original_points_size << "," << points_downsampler_info_msg.filtered_points_size
+        << "," << points_downsampler_info_msg.original_ring_size << ","
+        << points_downsampler_info_msg.filtered_ring_size << "," << points_downsampler_info_msg.exe_time << ","
+        << std::endl;
   }
-
 }
 
 int main(int argc, char** argv)
@@ -162,11 +160,12 @@ int main(int argc, char** argv)
 
   private_nh.getParam("points_topic", POINTS_TOPIC);
   private_nh.getParam("output_log", _output_log);
-  if(_output_log == true){
+  if (_output_log == true)
+  {
     char buffer[80];
     std::time_t now = std::time(NULL);
-    std::tm *pnow = std::localtime(&now);
-    std::strftime(buffer,80,"%Y%m%d_%H%M%S",pnow);
+    std::tm* pnow = std::localtime(&now);
+    std::strftime(buffer, 80, "%Y%m%d_%H%M%S", pnow);
     filename = "ring_filter_" + std::string(buffer) + ".csv";
     ofs.open(filename.c_str(), std::ios::app);
   }
@@ -174,7 +173,8 @@ int main(int argc, char** argv)
 
   // Publishers
   filtered_points_pub = nh.advertise<sensor_msgs::PointCloud2>("/filtered_points", 10);
-  points_downsampler_info_pub = nh.advertise<points_downsampler::PointsDownsamplerInfo>("/points_downsampler_info", 1000);
+  points_downsampler_info_pub =
+      nh.advertise<points_downsampler::PointsDownsamplerInfo>("/points_downsampler_info", 1000);
 
   // Subscribers
   ros::Subscriber config_sub = nh.subscribe("config/ring_filter", 10, config_callback);

@@ -83,7 +83,7 @@ static ros::Publisher localizer_pose_pub, ndt_pose_pub;
 static geometry_msgs::PoseStamped localizer_pose_msg, ndt_pose_msg;
 
 // double pose_mod(Posture *pose){
-void pose_mod(Posture *pose)
+void pose_mod(Posture* pose)
 {
   while (pose->theta < -M_PI)
     pose->theta += 2 * M_PI;
@@ -106,7 +106,7 @@ double nrand(double n)
   return r;
 }
 
-static void map_callback(const sensor_msgs::PointCloud2::ConstPtr &input)
+static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 {
   if (map_loaded == 0)
   {
@@ -130,7 +130,7 @@ static void map_callback(const sensor_msgs::PointCloud2::ConstPtr &input)
   }
 }
 
-static void initialpose_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr &input)
+static void initialpose_callback(const geometry_msgs::PoseWithCovarianceStamped::ConstPtr& input)
 {
   tf::TransformListener listener;
   tf::StampedTransform transform;
@@ -141,7 +141,7 @@ static void initialpose_callback(const geometry_msgs::PoseWithCovarianceStamped:
     listener.waitForTransform("/map", input->header.frame_id, now, ros::Duration(10.0));
     listener.lookupTransform("/map", input->header.frame_id, now, transform);
   }
-  catch (tf::TransformException &ex)
+  catch (tf::TransformException& ex)
   {
     ROS_ERROR("%s", ex.what());
   }
@@ -183,11 +183,11 @@ static void initialpose_callback(const geometry_msgs::PoseWithCovarianceStamped:
   prev_pose2 = prev_pose;
 }
 
-void points_callback(const sensor_msgs::PointCloud2::ConstPtr &msg)
+void points_callback(const sensor_msgs::PointCloud2::ConstPtr& msg)
 {
   matching_start = std::chrono::system_clock::now();
   static tf::TransformBroadcaster br;
-  static FILE *log_fp;
+  static FILE* log_fp;
   ros::Time time;
   static tf::TransformListener listener;
   static ros::Time current_scan_time;
@@ -274,7 +274,7 @@ void points_callback(const sensor_msgs::PointCloud2::ConstPtr &msg)
     /*gps resetting*/
     if (g_use_gnss)
     {
-      static FILE *e_fp;
+      static FILE* e_fp;
       if (!e_fp)
       {
         e_fp = fopen("/tmp/e_log", "w");
@@ -441,7 +441,7 @@ void points_callback(const sensor_msgs::PointCloud2::ConstPtr &msg)
   std::cout << "-----------------------------------------------------------------" << std::endl;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
   std::cout << "3D NDT scan matching" << std::endl;
 
@@ -465,7 +465,8 @@ int main(int argc, char *argv[])
   }
 
   // translation x, y, z, yaw, pitch, and roll
-  if (_tf_baselink2primarylidar.size() != 6) {
+  if (_tf_baselink2primarylidar.size() != 6)
+  {
     std::cout << "baselink to primary lidar transform is not valid." << std::endl;
     return 1;
   }

@@ -69,7 +69,8 @@ struct pose
   double yaw;
 };
 
-static pose initial_pose, predict_pose, previous_pose, icp_pose, current_pose, localizer_pose, previous_gnss_pose, current_gnss_pose;
+static pose initial_pose, predict_pose, previous_pose, icp_pose, current_pose, localizer_pose, previous_gnss_pose,
+    current_gnss_pose;
 
 static double offset_x, offset_y, offset_z, offset_yaw;  // current_pos - previous_pose
 
@@ -212,7 +213,6 @@ static void param_callback(const autoware_config_msgs::ConfigICP::ConstPtr& inpu
   max_correspondence_distance = input->max_correspondence_distance;
   euclidean_fitness_epsilon = input->euclidean_fitness_epsilon;
   ransac_outlier_rejection_threshold = input->ransac_outlier_rejection_threshold;
-
 }
 
 static void map_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
@@ -331,7 +331,8 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     Eigen::Matrix4f t(Eigen::Matrix4f::Identity());   // base_link
     Eigen::Matrix4f t2(Eigen::Matrix4f::Identity());  // localizer
 
-    std::chrono::time_point<std::chrono::system_clock> align_start, align_end, getFitnessScore_start, getFitnessScore_end;
+    std::chrono::time_point<std::chrono::system_clock> align_start, align_end, getFitnessScore_start,
+        getFitnessScore_end;
     static double align_time, getFitnessScore_time = 0.0;
 
     // Setting point cloud to be aligned.
@@ -370,7 +371,9 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     getFitnessScore_start = std::chrono::system_clock::now();
     fitness_score = icp.getFitnessScore();
     getFitnessScore_end = std::chrono::system_clock::now();
-    getFitnessScore_time = std::chrono::duration_cast<std::chrono::microseconds>(getFitnessScore_end - getFitnessScore_start).count() / 1000.0;
+    getFitnessScore_time =
+        std::chrono::duration_cast<std::chrono::microseconds>(getFitnessScore_end - getFitnessScore_start).count() /
+        1000.0;
 
     tf::Matrix3x3 mat_l;  // localizer
     mat_l.setValue(static_cast<double>(t(0, 0)), static_cast<double>(t(0, 1)), static_cast<double>(t(0, 2)),
@@ -538,7 +541,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     // Set values for /icp_stat
     icp_stat_msg.header.stamp = current_scan_time;
     icp_stat_msg.exe_time = time_icp_matching.data;
-//    icp_stat_msg.iteration = iteration;
+    //    icp_stat_msg.iteration = iteration;
     icp_stat_msg.score = fitness_score;
     icp_stat_msg.velocity = current_velocity;
     icp_stat_msg.acceleration = current_accel;
@@ -552,16 +555,16 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
       std::cerr << "Could not open " << filename << "." << std::endl;
       exit(1);
     }
-    ofs << input->header.seq << "," << scan_points_num << ","
-            << current_pose.x << "," << current_pose.y << "," << current_pose.z << "," << current_pose.roll << ","
-            << current_pose.pitch << "," << current_pose.yaw << "," << predict_pose.x << "," << predict_pose.y << ","
-            << predict_pose.z << "," << predict_pose.roll << "," << predict_pose.pitch << "," << predict_pose.yaw << ","
-            << current_pose.x - predict_pose.x << "," << current_pose.y - predict_pose.y << ","
-            << current_pose.z - predict_pose.z << "," << current_pose.roll - predict_pose.roll << ","
-            << current_pose.pitch - predict_pose.pitch << "," << current_pose.yaw - predict_pose.yaw << ","
-            << predict_pose_error << "," <<  "," << fitness_score << ","
-            << "," << current_velocity << "," << current_velocity_smooth << "," << current_accel
-            << "," << angular_velocity << "," << exe_time << "," << align_time << "," << getFitnessScore_time << std::endl;
+    ofs << input->header.seq << "," << scan_points_num << "," << current_pose.x << "," << current_pose.y << ","
+        << current_pose.z << "," << current_pose.roll << "," << current_pose.pitch << "," << current_pose.yaw << ","
+        << predict_pose.x << "," << predict_pose.y << "," << predict_pose.z << "," << predict_pose.roll << ","
+        << predict_pose.pitch << "," << predict_pose.yaw << "," << current_pose.x - predict_pose.x << ","
+        << current_pose.y - predict_pose.y << "," << current_pose.z - predict_pose.z << ","
+        << current_pose.roll - predict_pose.roll << "," << current_pose.pitch - predict_pose.pitch << ","
+        << current_pose.yaw - predict_pose.yaw << "," << predict_pose_error << ","
+        << "," << fitness_score << ","
+        << "," << current_velocity << "," << current_velocity_smooth << "," << current_accel << "," << angular_velocity
+        << "," << exe_time << "," << align_time << "," << getFitnessScore_time << std::endl;
 
     std::cout << "-----------------------------------------------------------------" << std::endl;
     std::cout << "Sequence: " << input->header.seq << std::endl;
@@ -635,8 +638,8 @@ int main(int argc, char** argv)
   // Set log file name.
   char buffer[80];
   std::time_t now = std::time(NULL);
-  std::tm *pnow = std::localtime(&now);
-  std::strftime(buffer,80,"%Y%m%d_%H%M%S",pnow);
+  std::tm* pnow = std::localtime(&now);
+  std::strftime(buffer, 80, "%Y%m%d_%H%M%S", pnow);
   filename = "icp_matching_" + std::string(buffer) + ".csv";
   ofs.open(filename.c_str(), std::ios::app);
 
@@ -659,7 +662,8 @@ int main(int argc, char** argv)
   }
 
   // translation x, y, z, yaw, pitch, and roll
-  if (_tf_baselink2primarylidar.size() != 6) {
+  if (_tf_baselink2primarylidar.size() != 6)
+  {
     std::cout << "baselink to primary lidar transform is not valid." << std::endl;
     return 1;
   }
@@ -682,14 +686,14 @@ int main(int argc, char** argv)
             << _tf_roll << ", " << _tf_pitch << ", " << _tf_yaw << ")" << std::endl;
   std::cout << "-----------------------------------------------------------------" << std::endl;
 
-  Eigen::Translation3f tl_btol(_tf_x, _tf_y, _tf_z);  // tl: translation
+  Eigen::Translation3f tl_btol(_tf_x, _tf_y, _tf_z);                 // tl: translation
   Eigen::AngleAxisf rot_x_btol(_tf_roll, Eigen::Vector3f::UnitX());  // rot: rotation
   Eigen::AngleAxisf rot_y_btol(_tf_pitch, Eigen::Vector3f::UnitY());
   Eigen::AngleAxisf rot_z_btol(_tf_yaw, Eigen::Vector3f::UnitZ());
   tf_btol = (tl_btol * rot_z_btol * rot_y_btol * rot_x_btol).matrix();
 
   Eigen::Translation3f tl_ltob((-1.0) * _tf_x, (-1.0) * _tf_y, (-1.0) * _tf_z);  // tl: translation
-  Eigen::AngleAxisf rot_x_ltob((-1.0) * _tf_roll, Eigen::Vector3f::UnitX());  // rot: rotation
+  Eigen::AngleAxisf rot_x_ltob((-1.0) * _tf_roll, Eigen::Vector3f::UnitX());     // rot: rotation
   Eigen::AngleAxisf rot_y_ltob((-1.0) * _tf_pitch, Eigen::Vector3f::UnitY());
   Eigen::AngleAxisf rot_z_ltob((-1.0) * _tf_yaw, Eigen::Vector3f::UnitZ());
   tf_ltob = (tl_ltob * rot_z_ltob * rot_y_ltob * rot_x_ltob).matrix();
