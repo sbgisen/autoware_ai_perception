@@ -10,7 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   roscpp
   sensor_msgs
-  velodyne_pointcloud
+  velodyne_pcl
 )
 
 add_message_files(
