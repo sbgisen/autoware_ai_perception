@@ -465,7 +465,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
 
     // Set values for publishing pose
     predict_q.setRPY(predict_pose.roll, predict_pose.pitch, predict_pose.yaw);
-    predict_pose_msg.header.frame_id = "/map";
+    predict_pose_msg.header.frame_id = "map";
     predict_pose_msg.header.stamp = current_scan_time;
     predict_pose_msg.pose.position.x = predict_pose.x;
     predict_pose_msg.pose.position.y = predict_pose.y;
@@ -476,7 +476,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     predict_pose_msg.pose.orientation.w = predict_q.w();
 
     icp_q.setRPY(icp_pose.roll, icp_pose.pitch, icp_pose.yaw);
-    icp_pose_msg.header.frame_id = "/map";
+    icp_pose_msg.header.frame_id = "map";
     icp_pose_msg.header.stamp = current_scan_time;
     icp_pose_msg.pose.position.x = icp_pose.x;
     icp_pose_msg.pose.position.y = icp_pose.y;
@@ -487,7 +487,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     icp_pose_msg.pose.orientation.w = icp_q.w();
 
     current_q.setRPY(current_pose.roll, current_pose.pitch, current_pose.yaw);
-    current_pose_msg.header.frame_id = "/map";
+    current_pose_msg.header.frame_id = "map";
     current_pose_msg.header.stamp = current_scan_time;
     current_pose_msg.pose.position.x = current_pose.x;
     current_pose_msg.pose.position.y = current_pose.y;
@@ -498,7 +498,7 @@ static void points_callback(const sensor_msgs::PointCloud2::ConstPtr& input)
     current_pose_msg.pose.orientation.w = current_q.w();
 
     localizer_q.setRPY(localizer_pose.roll, localizer_pose.pitch, localizer_pose.yaw);
-    localizer_pose_msg.header.frame_id = "/map";
+    localizer_pose_msg.header.frame_id = "map";
     localizer_pose_msg.header.stamp = current_scan_time;
     localizer_pose_msg.pose.position.x = localizer_pose.x;
     localizer_pose_msg.pose.position.y = localizer_pose.y;
