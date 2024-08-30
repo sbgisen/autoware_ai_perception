@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!-- -->
+<launch>
+  <arg name="input_topics" value="[ /colorization_point_cloud_node_front_center/colored_points, /colorization_point_cloud_node_front_left/colored_points, /colorization_point_cloud_node_front_right/colored_points, /colorization_point_cloud_node_rear_center/colored_points, /colorization_point_cloud_node_rear_left/colored_points, /colorization_point_cloud_node_rear_right/colored_points ]"/>
+  <arg name="output_topic" value="/points_concat"/>
+  <arg name="output_frame_id" value="velodyne"/>
+  <node pkg="points_preprocessor" type="points_concat_filter" name="points_concat_filter" output="screen">
+    <param name="output_frame_id" value="$(arg output_frame_id)"/>
+    <param name="input_topics" value="$(arg input_topics)"/>
+  </node>
+</launch>
