@@ -34,7 +34,7 @@ public:
   PointsConcatFilter();
 
 private:
-  typedef pcl::PointXYZI PointT;
+  typedef pcl::PointXYZ PointT;
   typedef pcl::PointCloud<PointT> PointCloudT;
   typedef sensor_msgs::PointCloud2 PointCloudMsgT;
   typedef message_filters::sync_policies::ApproximateTime<PointCloudMsgT, PointCloudMsgT, PointCloudMsgT,
